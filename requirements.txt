@@ -1,0 +1,16 @@
+# Core Dependencies
+openai>=0.27.0  # For OpenAI API interaction
+anthropic>=0.4.0  # For Anthropic API client
+requests>=2.28.1  # For CLI-based HTTP requests
+python-dotenv>=1.0.0  # For environment variable management
+
+# Utility Libraries
+datetime  # Standard library, no need to install
+json  # Standard library, no need to install
+os  # Standard library, no need to install
+colorsys  # Standard library, no need to install
+pathlib  # Standard library, no need to install
+dataclasses; python_version<"3.7"  # Backport for Python 3.6
+
+# Type Checking and Development Tools
+typing-extensions>=4.5.0  # For extended typing support
