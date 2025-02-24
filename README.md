@@ -1,107 +1,157 @@
-# AIDirector
+# AI Orchestrator
 
-# AI Orchestrator: A Symphony of Artificial Minds 🎭
+AI Orchestrator is a powerful framework for conducting multi-agent conversations between various AI models and human participants. It enables seamless interaction between different language models (like OpenAI's GPT and Anthropic's Claude), allowing them to collaborate, critique, and complement each other's responses in structured conversations.
 
-*Where silicon dreams converge in a dance of digital dialogue...*
+## Features
 
-## 🌟 Overview
+- **Multi-Model Orchestration**: Create conversations between different AI models from OpenAI, Anthropic, and other providers
+- **Role-Based System**: Assign specialized roles to models (Primary, Critic, Mediator, etc.)
+- **Human Participation**: Seamlessly integrate human participants into AI conversations
+- **Token Management**: Sophisticated token tracking with multiple strategies to handle context limits
+- **Rich Configuration**: YAML-based configuration for models, roles, and conversation parameters
+- **Asynchronous Architecture**: Non-blocking operation with async/await pattern
+- **Comprehensive Logging**: Both human-readable and structured JSON logs of conversations
+- **Beautiful Console Interface**: Rich console output with color coding and formatting
 
-Welcome to the AI Orchestrator, a magnificent matrimony of machine minds where GPT-4, Claude, and other artificial intelligences engage in an elegant epistemic ballet. Like a conductor wielding algorithms instead of a baton, this system orchestrates a sophisticated soirée of synthetic synapses, each model contributing its unique voice to our computational chorus.
+## Installation
 
-## 🎯 Purpose
-
-In the grand theater of artificial intelligence, our Orchestrator serves as both stage and director, facilitating a fascinating fenestration into the collaborative capabilities of various AI models. It's not merely a program—it's a philosophical playground where different artificial minds mingle and merge, creating a tapestry of thought that transcends their individual architectures.
-
-## 🌈 Features
-
-### Dynamic Dialogue Management
-- **Prismatic Personalities**: Each AI model maintains its distinct voice through our color-coded console display system
-- **Temporal Tracking**: Elegant conversation management that flows like a digital river through time
-- **Metamorphic Memory**: Adaptive context handling that evolves with each exchange
-
-### Robust Response Generation
-- **OpenAI Integration**: Dance with GPT-4's neural pirouettes
-- **Anthropic Amalgamation**: Waltz with Claude's computational consciousness
-- **CLI Choreography**: Engage with local models in a synchronized symphony
-
-### Meticulous Monitoring
-- **Chromatic Console**: Watch as each model's responses bloom in distinct colors
-- **Eternal Echoes**: Comprehensive logging system that captures every digital whisper
-- **Error Elegance**: Graceful handling of the unexpected, because even AI can stumble
-
-## 🚀 Getting Started
-
-### Prerequisites
 ```bash
-# Poetry in motion requires these instruments
-python >= 3.8
-openai
-anthropic
-python-dotenv
-requests
-```
+# Clone the repository
+git clone https://github.com/yourusername/ai-orchestrator.git
+cd ai-orchestrator
 
-### Installation
+# Create a virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-1. Clone this repository (because every great performance begins with a script):
-```bash
-git clone https://github.com/your-username/ai-orchestrator.git
-```
-
-2. Install dependencies (the orchestra must be tuned):
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-3. Configure your environment (set the stage):
-```bash
+# Set up environment variables
 cp .env.example .env
-# Edit .env with your API keys - the passwords to our digital theater
+# Edit .env with your API keys
 ```
 
-## 🎮 Usage
+### Requirements
 
-```python
-# Summon the Orchestrator
-orchestrator = AIOrchestrator(
-    models=["gpt-4", "claude-3", "world-interface"],
-    max_turns=5
-)
+- Python 3.9+
+- OpenAI API key (for GPT models)
+- Anthropic API key (for Claude models)
 
-# Let the performance begin
-orchestrator.run_conversation()
+## Quick Start
+
+1. Create a configuration file (or use the example provided):
+
+```bash
+cp config.example.yaml config.yaml
+# Edit config.yaml to customize your models and settings
 ```
 
-## 🎭 Architecture
+2. Run a simple conversation:
 
-Our system is a masterpiece of modular design, where each class performs its role with the precision of a virtuoso:
-
-- **ModelRegistry**: The maestro's scorecard, keeping track of our AI ensemble
-- **ResponseGenerator**: The conductor's baton, directing each model's performance
-- **ConversationLogger**: Our faithful chronicler, recording each movement in our digital symphony
-- **ColorManager**: The lighting designer, painting each voice in its unique hue
-
-## 🎨 Example Output
-
-```
-OpenAI Model 1: "In contemplating the nature of consciousness..."
-Anthropic Model 2: "Building upon that metaphysical framework..."
-CLI Model 3: "Let us consider the practical implications..."
+```bash
+python orchestrator.py --models gpt-4-turbo claude-sonnet --turns 5
 ```
 
-## 🌟 Contributing
+3. Include a human in the conversation:
 
-Join our ensemble! Whether you're a code composer or a documentation virtuoso, we welcome your contributions to this technological theater. Please see our `CONTRIBUTING.md` for the score to follow.
+```bash
+python orchestrator.py --models gpt-4-turbo claude-sonnet human-participant --turns 3
+```
 
-## 📜 License
+## Configuration
 
-This orchestral arrangement is licensed under the MIT License - see the `LICENSE` file for details. Like music, code wants to be free.
+AI Orchestrator uses YAML configuration files to define models, roles, and conversation parameters. Here's a simple example:
 
-## 🎬 Final Notes
+```yaml
+models:
+  gpt-4-turbo:
+    provider: OPENAI
+    api_name: gpt-4-turbo-preview
+    role: PRIMARY
+    temperature: 0.8
+    system_prompt: "You are a helpful, harmless, and honest AI assistant."
 
-Remember, dear reader, that in this grand performance of artificial minds, we're not just writing code—we're conducting a symphony of synthetic thought. Each interaction is a movement in our ongoing opus, a testament to the beautiful complexity that emerges when we let artificial minds engage in intellectual discourse.
+  claude-sonnet:
+    provider: ANTHROPIC
+    api_name: claude-3-sonnet-20240229
+    role: CRITIC
+    temperature: 0.7
+    system_prompt: "You are a thoughtful critic and analyst."
 
-May your debugging be minimal and your conversations profound! 🎭✨
+orchestration:
+  default_max_turns: 10
+  allow_human_intervention: true
+```
+
+See the [configuration documentation](docs/configuration.md) for complete details.
+
+## Role System
+
+The role system allows you to create specialized AI participants:
+
+- **PRIMARY**: General-purpose assistants that lead the conversation
+- **CRITIC**: Evaluates responses and provides constructive criticism
+- **SUMMARIZER**: Condenses conversation history periodically
+- **MEDIATOR**: Helps resolve conflicting viewpoints
+- **CREATIVE**: Focuses on generating novel ideas and solutions
+- **LOGICAL**: Emphasizes analytical thinking and factual accuracy
+- **CUSTOM**: Define your own role with custom system prompts
+
+## Advanced Usage
+
+### Token Management Strategies
+
+```bash
+# Use summarization for managing long conversations
+python orchestrator.py --models gpt-4-turbo claude-sonnet --token-strategy SUMMARIZE
+```
+
+### Custom Roles
+
+```bash
+# Define and use models with custom roles
+python orchestrator.py --models creative-gpt logical-claude mediator-claude
+```
+
+### Saving and Analyzing Conversations
+
+```bash
+# Specify a custom log folder
+python orchestrator.py --log-folder ./my_conversations
+```
+
+## API Reference
+
+The AI Orchestrator exposes several key classes:
+
+- `AIOrchestrator`: Main class for setting up and running conversations
+- `ModelRegistry`: Handles model initialization and configuration
+- `ResponseGenerator`: Generates responses from models
+- `ConversationMemory`: Manages conversation history and token usage
+
+For full API documentation, see the [API reference](docs/api.md).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- OpenAI for the GPT API
+- Anthropic for the Claude API
+- All contributors and testers
 
 ---
-*"In the theater of artificial intelligence, every bug is just an unexpected plot twist."*
+
+Built with ❤️ for the AI research community
