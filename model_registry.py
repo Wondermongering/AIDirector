@@ -88,6 +88,11 @@ class ConfigurationManager:
     def get_logging_config(self) -> Dict[str, Any]:
         return self.config.get("logging", {})
 
+    def get_plugins(self) -> List[str]:
+        """Return plugin modules configured in the YAML file."""
+        plugins = self.config.get("plugins", [])
+        return plugins if isinstance(plugins, list) else []
+
 
 class ModelRegistry:
     """Registry for AI models with initialization of clients."""

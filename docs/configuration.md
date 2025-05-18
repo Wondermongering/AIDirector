@@ -37,3 +37,14 @@ Control log output under `logging`:
 - `anonymize_data` – remove personal information from logs.
 
 Use the example configuration file (`config.example.yaml`) as a starting point and modify the fields that apply to your setup.
+
+## Plugins
+
+Optional plugins can be loaded by listing module paths under the `plugins` key. For example:
+
+```yaml
+plugins:
+  - my_package.my_plugin
+```
+
+Plugins can also be provided by installed packages using the `aidirector.plugins` entry point. See [plugins.md](plugins.md) for details.
