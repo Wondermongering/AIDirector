@@ -309,7 +309,6 @@ class ConfigurationManager:
 class ModelRegistry:
     """Registry for AI models with initialization of clients."""
     def __init__(self, config_manager: ConfigurationManager):
-        load_dotenv()
         self.config_manager = config_manager
         self.models: Dict[str, ModelConfig] = {}
         self._initialize_models()
@@ -683,7 +682,10 @@ async def main():
     parser.add_argument("--list-models", action="store_true", help="List available models and exit")
     
     args = parser.parse_args()
-    
+
+    # Load environment variables before initializing the registry
+    load_dotenv()
+
     # Create orchestrator
     orchestrator = AIOrchestrator(
         models=args.models,

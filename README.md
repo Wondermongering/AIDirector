@@ -29,7 +29,13 @@ pip install -r requirements.txt
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env with your API keys
+# Edit `.env` and provide the required keys:
+
+```
+OPENAI_API_KEY=<your OpenAI API key>
+ANTHROPIC_API_KEY=<your Anthropic API key>
+# Optional key used when interacting with the world interface
+WORLD_INTERFACE_KEY=<your world interface key>
 ```
 
 ### Requirements
