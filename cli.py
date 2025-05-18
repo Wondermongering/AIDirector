@@ -155,61 +155,7 @@ class AIOrchestrator:
         await self._initialize_conversation()
         self.plugins.run_hook("conversation_start", orchestrator=self)
 
-        while self.turn < self.max_turns and self.running:
-            console.print(f"\n[bold]Turn {self.turn + 1}/{self.max_turns}[/bold]")
-            if self.dialogic:
-                coordinator = DialogicTurnCoordinator(
-                    self.models, self.registry, self.response_generator, self.dialogic_cycles
-                )
-                before = len(self.shared_memory.get_messages())
-                await coordinator.execute(self.shared_memory)
-                new_messages = self.shared_memory.get_messages()[before:]
-                for message in new_messages:
-                    actor_name = message.metadata.get("model", "unknown")
-                    self.display_message(actor_name, message)
-                    self.logger.log_message(actor_name, message)
-                    self.plugins.run_hook("message", actor=actor_name, message=message)
-            else:
-                for model_name in self.models:
-                    model_config = self.registry.get_model(model_name)
-                    if not model_config:
-                        logger.warning("Model %s not found in registry. Skipping.", model_name)
-                        continue
-                    actor_name = f"{model_config.provider} ({model_name})"
-                    try:
-                        last_msg = self.shared_memory.get_messages()[-1]
-                        if isinstance(last_msg.content, MessageContent):
-                            query = last_msg.content.text
-                        else:
-                            query = last_msg.content
-                        context_items = self.memory_palace.retrieve_related(query, top_k=3)
-                        context_text = "\n".join(item["text"] for item in context_items)
-                        prompt = model_config.system_prompt
-                        if context_text:
-                            prompt = f"{prompt}\nRelevant context:\n{context_text}"
-                        response_text = await self.response_generator.generate_response(
-                            model_name, self.shared_memory, prompt
-                        )
-                        response_message = Message(
-                            role="assistant" if model_config.provider != ModelProvider.HUMAN else "user",
-                            content=response_text,
-                            metadata={"model": model_name, "role": model_config.role.value},
-                        )
-                        self.shared_memory.add_message(response_message)
-                        self.conversation_memories[model_name].add_message(response_message)
-                        self.semantic_memory.add_memory(response_message.content.text, {"actor": model_name})
-                        self.memory_palace.add_memory(response_message.content.text, {"actor": model_name})
-                        self.display_message(actor_name, response_message)
-                        self.logger.log_message(actor_name, response_message)
-                        self.plugins.run_hook(
-                            "message", actor=actor_name, message=response_message
-                        )
-                        if not self.running:
-                            break
-                    except Exception as e:  # pragma: no cover - runtime path
-                        logger.error("Error with %s: %s", actor_name, e)
-                        console.print(f"[bold red]Error with {actor_name}:[/bold red] {e}")
-                        continue
+    
             self.turn += 1
             if self.running and self.turn < self.max_turns:
                 if not Confirm.ask("\nContinue to next turn?", default=True):
