@@ -13,6 +13,7 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
+from dotenv import load_dotenv
 
 from conversation_memory import ConversationMemory, Message, MessageContent
 from semantic_memory import SemanticMemory
@@ -218,6 +219,7 @@ class AIOrchestrator:
 
 
 def run_cli() -> None:
+    load_dotenv()
     parser = argparse.ArgumentParser(description="AI Conversation Orchestrator")
     parser.add_argument("--models", nargs="+", default=["gpt-4", "claude-3"], help="Models to include in conversation")
     parser.add_argument("--turns", type=int, default=5, help="Maximum number of conversation turns")

@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional
 
 import openai
 import anthropic
-from dotenv import load_dotenv
 import yaml
 
 from conversation_memory import TokenLimitStrategy
@@ -98,7 +97,6 @@ class ModelRegistry:
     """Registry for AI models with initialization of clients."""
 
     def __init__(self, config_manager: ConfigurationManager) -> None:
-        load_dotenv()
         self.config_manager = config_manager
         self.models: Dict[str, ModelConfig] = {}
         self._initialize_models()
