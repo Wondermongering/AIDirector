@@ -6,3 +6,5 @@ tiktoken
 pyyaml
 requests
 pydantic
+numpy
+sentence-transformers
