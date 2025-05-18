@@ -121,6 +121,10 @@ python main.py --models creative-gpt logical-claude mediator-claude
 python main.py --log-folder ./my_conversations
 ```
 
+## Plugins
+
+The orchestrator can be extended via plugins. List plugin modules under the `plugins` key in your configuration file or install packages that expose an entry point in the `aidirector.plugins` group. See [docs/plugins.md](docs/plugins.md) for details.
+
 ## API Reference
 
 The AI Orchestrator exposes several key classes:

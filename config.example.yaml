@@ -82,3 +82,7 @@ logging:
   save_media: true
   metrics_tracking: true
   anonymize_data: false
+
+# Optional plugins
+plugins:
+  - my_package.my_plugin

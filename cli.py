@@ -17,6 +17,7 @@ from rich.prompt import Confirm, Prompt
 from conversation_memory import ConversationMemory, Message, MessageContent
 from model_registry import ConfigurationManager, ModelRegistry, ModelProvider
 from response_generator import ResponseGenerator
+from plugin_manager import PluginManager
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -106,6 +107,7 @@ class AIOrchestrator:
         self.config_manager = ConfigurationManager(Path(config_path) if config_path else None)
         self.registry = ModelRegistry(self.config_manager)
         self.response_generator = ResponseGenerator(self.registry)
+        self.plugins = PluginManager(self.config_manager)
         self.logger = ConversationLogger(Path(log_folder))
         self.color_manager = ColorManager()
         self.conversation_memories: Dict[str, ConversationMemory] = {}
@@ -115,6 +117,7 @@ class AIOrchestrator:
         signal.signal(signal.SIGINT, self._handle_interrupt)
         signal.signal(signal.SIGTERM, self._handle_interrupt)
         self._initialize_memories()
+        self.plugins.run_hook("on_init", orchestrator=self)
 
     def _initialize_memories(self) -> None:
         for model_name in self.models:
@@ -140,6 +143,7 @@ class AIOrchestrator:
     async def run_conversation(self) -> None:
         console.print("[bold]Conversation Initialized![/bold]")
         await self._initialize_conversation()
+        self.plugins.run_hook("conversation_start", orchestrator=self)
 
         while self.turn < self.max_turns and self.running:
             console.print(f"\n[bold]Turn {self.turn + 1}/{self.max_turns}[/bold]")
@@ -162,6 +166,9 @@ class AIOrchestrator:
                     self.conversation_memories[model_name].add_message(response_message)
                     self.display_message(actor_name, response_message)
                     self.logger.log_message(actor_name, response_message)
+                    self.plugins.run_hook(
+                        "message", actor=actor_name, message=response_message
+                    )
                     if not self.running:
                         break
                 except Exception as e:  # pragma: no cover - runtime path
@@ -173,6 +180,7 @@ class AIOrchestrator:
                 if not Confirm.ask("\nContinue to next turn?", default=True):
                     self.running = False
         console.print("\n[bold green]Conversation Complete.[/bold green]")
+        self.plugins.run_hook("conversation_end", orchestrator=self)
 
     async def _initialize_conversation(self) -> None:
         has_human = "human" in self.models
@@ -181,6 +189,7 @@ class AIOrchestrator:
             self.shared_memory.add_message(human_starter)
             self.conversation_memories["human"].add_message(human_starter)
             self.logger.log_message("Human", human_starter)
+            self.plugins.run_hook("message", actor="Human", message=human_starter)
         else:
             starter_message = Message(
                 role="system",
@@ -190,6 +199,7 @@ class AIOrchestrator:
             for model_name in self.models:
                 self.conversation_memories[model_name].add_message(starter_message)
             self.logger.log_message("System", starter_message)
+            self.plugins.run_hook("message", actor="System", message=starter_message)
 
 
 def run_cli() -> None:
