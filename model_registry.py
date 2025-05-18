@@ -12,6 +12,13 @@ from dotenv import load_dotenv
 import yaml
 
 from conversation_memory import TokenLimitStrategy
+from model_providers import (
+    AnthropicProvider,
+    CLIProvider,
+    HumanProvider,
+    ModelProviderInterface,
+    OpenAIProvider,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +103,12 @@ class ModelRegistry:
         load_dotenv()
         self.config_manager = config_manager
         self.models: Dict[str, ModelConfig] = {}
+        self.providers: dict[ModelProvider, ModelProviderInterface] = {
+            ModelProvider.OPENAI: OpenAIProvider(),
+            ModelProvider.ANTHROPIC: AnthropicProvider(),
+            ModelProvider.CLI: CLIProvider(),
+            ModelProvider.HUMAN: HumanProvider(),
+        }
         self._initialize_models()
 
     def _initialize_models(self) -> None:
@@ -205,3 +218,6 @@ class ModelRegistry:
 
     def list_available_models(self) -> List[str]:
         return list(self.models.keys())
+
+    def get_provider(self, provider: ModelProvider) -> ModelProviderInterface:
+        return self.providers[provider]

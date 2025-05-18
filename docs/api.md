@@ -8,6 +8,9 @@ High level interface that manages the conversation loop. It loads configuration,
 ## ModelRegistry
 Loads model definitions from the configuration file and initializes API clients for each provider.
 
+## ModelProviderInterface
+Abstract base class for model providers. Concrete implementations for OpenAI, Anthropic, CLI, and human input expose a shared `generate_response` method. The `ResponseGenerator` relies on this interface so new providers can be added with minimal changes.
+
 ## ResponseGenerator
 Handles calling the underlying model APIs (OpenAI, Anthropic, CLI or human input) to generate responses based on the conversation history.
 
