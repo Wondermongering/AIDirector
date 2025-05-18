@@ -40,11 +40,11 @@ cp .env.example .env
 
 ## Quick Start
 
-1. Create a configuration file (or use the example provided):
+1. Create a configuration file by copying the included example:
 
 ```bash
 cp config.example.yaml config.yaml
-# Edit config.yaml to customize your models and settings
+# Edit config.yaml to customize your models and orchestration settings
 ```
 
 2. Run a simple conversation:
