@@ -50,13 +50,13 @@ cp config.example.yaml config.yaml
 2. Run a simple conversation:
 
 ```bash
-python orchestrator.py --models gpt-4-turbo claude-sonnet --turns 5
+python main.py --models gpt-4-turbo claude-sonnet --turns 5
 ```
 
 3. Include a human in the conversation:
 
 ```bash
-python orchestrator.py --models gpt-4-turbo claude-sonnet human-participant --turns 3
+python main.py --models gpt-4-turbo claude-sonnet human-participant --turns 3
 ```
 
 ## Configuration
@@ -104,21 +104,21 @@ The role system allows you to create specialized AI participants:
 
 ```bash
 # Use summarization for managing long conversations
-python orchestrator.py --models gpt-4-turbo claude-sonnet --token-strategy SUMMARIZE
+python main.py --models gpt-4-turbo claude-sonnet --token-strategy SUMMARIZE
 ```
 
 ### Custom Roles
 
 ```bash
 # Define and use models with custom roles
-python orchestrator.py --models creative-gpt logical-claude mediator-claude
+python main.py --models creative-gpt logical-claude mediator-claude
 ```
 
 ### Saving and Analyzing Conversations
 
 ```bash
 # Specify a custom log folder
-python orchestrator.py --log-folder ./my_conversations
+python main.py --log-folder ./my_conversations
 ```
 
 ## API Reference

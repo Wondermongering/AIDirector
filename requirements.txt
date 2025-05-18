@@ -1,0 +1,8 @@
+openai
+anthropic
+python-dotenv
+rich
+tiktoken
+pyyaml
+requests
+pydantic
