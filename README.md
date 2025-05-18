@@ -134,11 +134,17 @@ For full API documentation, see the [API reference](docs/api.md).
 
 ## Running Tests
 
-The project uses [pytest](https://pytest.org/) for unit tests. To execute the
-test suite, simply run:
+The project uses [pytest](https://pytest.org/) for unit tests. Install the
+testing dependencies with:
 
 ```bash
-pytest
+pip install pytest pytest-cov
+```
+
+To run the suite and measure coverage:
+
+```bash
+pytest --cov
 ```
 
 ## Contributing
