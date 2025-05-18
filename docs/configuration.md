@@ -37,3 +37,17 @@ Control log output under `logging`:
 - `anonymize_data` – remove personal information from logs.
 
 Use the example configuration file (`config.example.yaml`) as a starting point and modify the fields that apply to your setup.
+
+## Environment Variables
+
+Model API keys are loaded from environment variables. Create a `.env` file based
+on `.env.example` or export the variables directly:
+
+```bash
+export OPENAI_API_KEY=your-openai-key
+export ANTHROPIC_API_KEY=your-anthropic-key
+export WORLD_INTERFACE_KEY=your-cli-key
+```
+
+Set `metrics_tracking` in the `logging` section to enable metrics recorded by
+`metrics.py`.

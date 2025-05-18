@@ -29,7 +29,11 @@ pip install -r requirements.txt
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env with your API keys
+# Edit `.env` with your API keys or export them manually
+# Required variables:
+# - `OPENAI_API_KEY`
+# - `ANTHROPIC_API_KEY`
+# - `WORLD_INTERFACE_KEY` (for CLI/plugin providers)
 ```
 
 ### Requirements
@@ -107,6 +111,15 @@ The role system allows you to create specialized AI participants:
 python main.py --models gpt-4-turbo claude-sonnet --token-strategy SUMMARIZE
 ```
 
+### Step-by-Step: Custom Roles
+
+1. Add a model entry in `config.yaml` with `role: CUSTOM` and provide a
+   `system_prompt` describing the role.
+2. Launch the orchestrator specifying the model name:
+   ```bash
+   python main.py --models my-custom-model other-model
+   ```
+
 ### Custom Roles
 
 ```bash
@@ -114,12 +127,28 @@ python main.py --models gpt-4-turbo claude-sonnet --token-strategy SUMMARIZE
 python main.py --models creative-gpt logical-claude mediator-claude
 ```
 
+### Step-by-Step: Token Strategies
+
+1. Set `token_limit_strategy` on a model to one of
+   `TRUNCATE_OLDEST`, `SUMMARIZE`, or `SLIDING_WINDOW`.
+2. Run the conversation and the memory manager will apply the strategy whenever
+   the context grows too large.
+
+### Step-by-Step: Plugin Usage
+
+1. Define a model with provider `CLI` or implement `ProviderInterface`.
+2. Set `WORLD_INTERFACE_KEY` in your environment for authentication.
+3. Run the orchestrator with the plugin model included.
+
 ### Saving and Analyzing Conversations
 
 ```bash
 # Specify a custom log folder
 python main.py --log-folder ./my_conversations
 ```
+
+See [docs/examples.md](docs/examples.md) for more detailed, step-by-step
+examples of these advanced features.
 
 ## API Reference
 
@@ -131,6 +160,10 @@ The AI Orchestrator exposes several key classes:
 - `ConversationMemory`: Manages conversation history and token usage
 
 For full API documentation, see the [API reference](docs/api.md).
+Additional documentation is available:
+- [Provider Interfaces](docs/provider_interfaces.md)
+- [Semantic Memory](docs/semantic_memory.md)
+- [Metrics](docs/metrics.md)
 
 ## Running Tests
 
