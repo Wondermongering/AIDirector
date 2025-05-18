@@ -16,6 +16,7 @@ from rich.prompt import Confirm, Prompt
 from dotenv import load_dotenv
 
 from conversation_memory import ConversationMemory, Message, MessageContent
+from style_adapter import StyleAdapter
 from semantic_memory import SemanticMemory
 from model_registry import ConfigurationManager, ModelRegistry, ModelProvider
 from response_generator import ResponseGenerator
@@ -112,6 +113,7 @@ class AIOrchestrator:
         self.plugins = PluginManager(self.config_manager)
         self.logger = ConversationLogger(Path(log_folder))
         self.color_manager = ColorManager()
+        self.style_adapter = StyleAdapter()
         self.semantic_memory = SemanticMemory()
         self.conversation_memories: Dict[str, ConversationMemory] = {}
         self.shared_memory = ConversationMemory(max_tokens=100000)
@@ -164,7 +166,7 @@ class AIOrchestrator:
                         query = last_msg.content
                     context_items = self.semantic_memory.retrieve_relevant(query, top_k=3)
                     context_text = "\n".join(item["text"] for item in context_items)
-                    prompt = model_config.system_prompt
+                    prompt = self.style_adapter.apply_style(model_config.system_prompt)
                     if context_text:
                         prompt = f"{prompt}\nRelevant context:\n{context_text}"
                     response_text = await self.response_generator.generate_response(
@@ -177,6 +179,7 @@ class AIOrchestrator:
                     )
                     self.shared_memory.add_message(response_message)
                     self.conversation_memories[model_name].add_message(response_message)
+                    self.style_adapter.update(response_message)
                     self.semantic_memory.add_memory(response_message.content.text, {"actor": model_name})
                     self.display_message(actor_name, response_message)
                     self.logger.log_message(actor_name, response_message)
@@ -202,6 +205,7 @@ class AIOrchestrator:
             human_starter = Message(role="user", content=Prompt.ask("\n[bold]Start the conversation[/bold]"))
             self.shared_memory.add_message(human_starter)
             self.conversation_memories["human"].add_message(human_starter)
+            self.style_adapter.update(human_starter)
             self.semantic_memory.add_memory(human_starter.content.text, {"actor": "human"})
             self.logger.log_message("Human", human_starter)
             self.plugins.run_hook("message", actor="Human", message=human_starter)
@@ -214,6 +218,7 @@ class AIOrchestrator:
             for model_name in self.models:
                 self.conversation_memories[model_name].add_message(starter_message)
                 self.semantic_memory.add_memory(starter_message.content.text, {"actor": "system"})
+            self.style_adapter.update(starter_message)
             self.logger.log_message("System", starter_message)
             self.plugins.run_hook("message", actor="System", message=starter_message)
 
