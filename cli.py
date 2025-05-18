@@ -21,6 +21,7 @@ from memory_palace import MemoryPalace
 from model_registry import ConfigurationManager, ModelRegistry, ModelProvider
 from response_generator import ResponseGenerator
 from plugin_manager import PluginManager
+from turn_taking import DialogicTurnCoordinator
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -103,10 +104,14 @@ class AIOrchestrator:
         max_turns: int = 10,
         log_folder: str = "OrchestratorLogs",
         config_path: str | None = None,
+        dialogic: bool = False,
+        dialogic_cycles: int = 3,
     ) -> None:
         self.models = models
         self.max_turns = max_turns
         self.turn = 0
+        self.dialogic = dialogic
+        self.dialogic_cycles = dialogic_cycles
         self.config_manager = ConfigurationManager(Path(config_path) if config_path else None)
         self.registry = ModelRegistry(self.config_manager)
         self.response_generator = ResponseGenerator(self.registry)
@@ -150,48 +155,7 @@ class AIOrchestrator:
         await self._initialize_conversation()
         self.plugins.run_hook("conversation_start", orchestrator=self)
 
-        while self.turn < self.max_turns and self.running:
-            console.print(f"\n[bold]Turn {self.turn + 1}/{self.max_turns}[/bold]")
-            for model_name in self.models:
-                model_config = self.registry.get_model(model_name)
-                if not model_config:
-                    logger.warning("Model %s not found in registry. Skipping.", model_name)
-                    continue
-                actor_name = f"{model_config.provider} ({model_name})"
-                try:
-                    last_msg = self.shared_memory.get_messages()[-1]
-                    if isinstance(last_msg.content, MessageContent):
-                        query = last_msg.content.text
-                    else:
-                        query = last_msg.content
-                    context_items = self.memory_palace.retrieve_related(query, top_k=3)
-                    context_text = "\n".join(item["text"] for item in context_items)
-                    prompt = model_config.system_prompt
-                    if context_text:
-                        prompt = f"{prompt}\nRelevant context:\n{context_text}"
-                    response_text = await self.response_generator.generate_response(
-                        model_name, self.shared_memory, prompt
-                    )
-                    response_message = Message(
-                        role="assistant" if model_config.provider != ModelProvider.HUMAN else "user",
-                        content=response_text,
-                        metadata={"model": model_name, "role": model_config.role.value},
-                    )
-                    self.shared_memory.add_message(response_message)
-                    self.conversation_memories[model_name].add_message(response_message)
-                    self.semantic_memory.add_memory(response_message.content.text, {"actor": model_name})
-                    self.memory_palace.add_memory(response_message.content.text, {"actor": model_name})
-                    self.display_message(actor_name, response_message)
-                    self.logger.log_message(actor_name, response_message)
-                    self.plugins.run_hook(
-                        "message", actor=actor_name, message=response_message
-                    )
-                    if not self.running:
-                        break
-                except Exception as e:  # pragma: no cover - runtime path
-                    logger.error("Error with %s: %s", actor_name, e)
-                    console.print(f"[bold red]Error with {actor_name}:[/bold red] {e}")
-                    continue
+    
             self.turn += 1
             if self.running and self.turn < self.max_turns:
                 if not Confirm.ask("\nContinue to next turn?", default=True):
@@ -231,6 +195,8 @@ def run_cli() -> None:
     parser.add_argument("--config", type=str, help="Path to configuration file")
     parser.add_argument("--log-folder", type=str, default="OrchestratorLogs", help="Folder for conversation logs")
     parser.add_argument("--list-models", action="store_true", help="List available models and exit")
+    parser.add_argument("--dialogic", action="store_true", help="Enable dialogic turn-taking")
+    parser.add_argument("--cycles", type=int, default=3, help="Sub-turn cycles per dialogic turn")
 
     args = parser.parse_args()
 
@@ -239,6 +205,8 @@ def run_cli() -> None:
         max_turns=args.turns,
         log_folder=args.log_folder,
         config_path=args.config,
+        dialogic=args.dialogic,
+        dialogic_cycles=args.cycles,
     )
 
     if args.list_models:
