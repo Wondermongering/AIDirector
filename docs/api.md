@@ -21,3 +21,8 @@ Reads the YAML configuration, providing access to model, orchestration and loggi
 Writes conversation transcripts to plain text and JSON log files for later analysis.
 
 These classes are defined in `main.py` and are intended to be composed by `AIOrchestrator` when running a chat session.
+
+## DialogicTurnCoordinator
+
+Coordinates sub-turns where multiple models collaborate on a single response.
+Models can interrupt the cycle by emitting `[INTERRUPT]` in their output.
