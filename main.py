@@ -23,13 +23,30 @@ from rich.panel import Panel
 from rich.prompt import Prompt, Confirm
 from pydantic import BaseModel, Field, validator
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler("orchestrator.log"), logging.StreamHandler()]
-)
+# Logger will be configured at runtime
 logger = logging.getLogger("orchestrator")
+
+
+def configure_logging(config: Dict[str, Any], level_override: Optional[str] = None) -> None:
+    """Configure application logging."""
+    level_str = level_override or config.get("log_level", "INFO")
+    log_level = getattr(logging, level_str.upper(), logging.INFO)
+
+    handlers = []
+    if config.get("file_output", True):
+        handlers.append(logging.FileHandler("orchestrator.log"))
+    if config.get("console_output", True):
+        handlers.append(logging.StreamHandler())
+
+    if not handlers:
+        handlers.append(logging.NullHandler())
+
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=handlers,
+    )
+    logger.setLevel(log_level)
 
 # Create rich console for pretty output
 console = Console()
@@ -681,9 +698,14 @@ async def main():
     parser.add_argument("--config", type=str, help="Path to configuration file")
     parser.add_argument("--log-folder", type=str, default="OrchestratorLogs", help="Folder for conversation logs")
     parser.add_argument("--list-models", action="store_true", help="List available models and exit")
-    
+    parser.add_argument("--log-level", type=str, help="Override logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
+
     args = parser.parse_args()
-    
+
+    # Load configuration and configure logging
+    config_manager = ConfigurationManager(Path(args.config) if args.config else None)
+    configure_logging(config_manager.get_logging_config(), args.log_level)
+
     # Create orchestrator
     orchestrator = AIOrchestrator(
         models=args.models,

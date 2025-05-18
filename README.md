@@ -121,6 +121,23 @@ python orchestrator.py --models creative-gpt logical-claude mediator-claude
 python orchestrator.py --log-folder ./my_conversations
 ```
 
+### Adjusting Log Levels
+
+Logging behavior can be configured in `config.yaml` under the `logging` section:
+
+```yaml
+logging:
+  log_level: INFO        # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  console_output: true   # Show logs in the console
+  file_output: true      # Write logs to orchestrator.log
+```
+
+You can also override the level from the command line:
+
+```bash
+python orchestrator.py --log-level DEBUG
+```
+
 ## API Reference
 
 The AI Orchestrator exposes several key classes:
