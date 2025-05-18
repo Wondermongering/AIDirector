@@ -82,3 +82,7 @@ logging:
   save_media: true
   metrics_tracking: true
   anonymize_data: false
+
+metrics:
+  enabled: true
+  export_file: metrics.json

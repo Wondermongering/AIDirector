@@ -17,6 +17,7 @@ from rich.prompt import Confirm, Prompt
 from conversation_memory import ConversationMemory, Message, MessageContent
 from model_registry import ConfigurationManager, ModelRegistry, ModelProvider
 from response_generator import ResponseGenerator
+from metrics_collector import MetricsCollector
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -105,7 +106,11 @@ class AIOrchestrator:
         self.turn = 0
         self.config_manager = ConfigurationManager(Path(config_path) if config_path else None)
         self.registry = ModelRegistry(self.config_manager)
-        self.response_generator = ResponseGenerator(self.registry)
+        self.metrics_config = self.config_manager.get_metrics_config()
+        self.metrics_collector = (
+            MetricsCollector() if self.metrics_config.get("enabled") else None
+        )
+        self.response_generator = ResponseGenerator(self.registry, self.metrics_collector)
         self.logger = ConversationLogger(Path(log_folder))
         self.color_manager = ColorManager()
         self.conversation_memories: Dict[str, ConversationMemory] = {}
@@ -173,6 +178,12 @@ class AIOrchestrator:
                 if not Confirm.ask("\nContinue to next turn?", default=True):
                     self.running = False
         console.print("\n[bold green]Conversation Complete.[/bold green]")
+        if self.metrics_collector and self.metrics_config.get("export_file"):
+            export_path = Path(self.metrics_config["export_file"])
+            if not export_path.is_absolute():
+                export_path = self.logger.log_folder / export_path
+            self.metrics_collector.export(export_path)
+            console.print(f"[bold]Metrics saved to {export_path}[/bold]")
 
     async def _initialize_conversation(self) -> None:
         has_human = "human" in self.models

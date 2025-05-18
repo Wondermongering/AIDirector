@@ -88,6 +88,9 @@ class ConfigurationManager:
     def get_logging_config(self) -> Dict[str, Any]:
         return self.config.get("logging", {})
 
+    def get_metrics_config(self) -> Dict[str, Any]:
+        return self.config.get("metrics", {})
+
 
 class ModelRegistry:
     """Registry for AI models with initialization of clients."""

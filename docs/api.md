@@ -20,4 +20,7 @@ Reads the YAML configuration, providing access to model, orchestration and loggi
 ## ConversationLogger
 Writes conversation transcripts to plain text and JSON log files for later analysis.
 
+## MetricsCollector
+Aggregates response times, token usage and error counts and can export a summary to JSON.
+
 These classes are defined in `main.py` and are intended to be composed by `AIOrchestrator` when running a chat session.

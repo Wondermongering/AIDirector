@@ -11,6 +11,7 @@ AI Orchestrator is a powerful framework for conducting multi-agent conversations
 - **Rich Configuration**: YAML-based configuration for models, roles, and conversation parameters
 - **Asynchronous Architecture**: Non-blocking operation with async/await pattern
 - **Comprehensive Logging**: Both human-readable and structured JSON logs of conversations
+- **Metrics Collection**: Track response times, token usage, and errors
 - **Beautiful Console Interface**: Rich console output with color coding and formatting
 
 ## Installation
@@ -119,6 +120,15 @@ python main.py --models creative-gpt logical-claude mediator-claude
 ```bash
 # Specify a custom log folder
 python main.py --log-folder ./my_conversations
+```
+
+### Viewing Metrics
+
+When metrics are enabled, a summary file is written after the run. By default
+it is saved as `metrics.json` in the log folder.
+
+```bash
+cat OrchestratorLogs/metrics.json
 ```
 
 ## API Reference

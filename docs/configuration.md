@@ -36,4 +36,17 @@ Control log output under `logging`:
 - `metrics_tracking` – record basic metrics about the run.
 - `anonymize_data` – remove personal information from logs.
 
+## Metrics
+
+Configure metrics collection under the `metrics` section:
+
+```
+metrics:
+  enabled: true
+  export_file: metrics.json
+```
+
+- `enabled` – turn metrics collection on or off.
+- `export_file` – file where metrics will be written after the run.
+
 Use the example configuration file (`config.example.yaml`) as a starting point and modify the fields that apply to your setup.
