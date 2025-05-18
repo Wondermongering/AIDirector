@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 
 from conversation_memory import ConversationMemory, Message, MessageContent
 from semantic_memory import SemanticMemory
+from conversation_archive import ConversationArchive
 from model_registry import ConfigurationManager, ModelRegistry, ModelProvider
 from response_generator import ResponseGenerator
 from plugin_manager import PluginManager
@@ -102,6 +103,7 @@ class AIOrchestrator:
         max_turns: int = 10,
         log_folder: str = "OrchestratorLogs",
         config_path: str | None = None,
+        archive_path: str = "conversation_archive.json",
     ) -> None:
         self.models = models
         self.max_turns = max_turns
@@ -113,6 +115,7 @@ class AIOrchestrator:
         self.logger = ConversationLogger(Path(log_folder))
         self.color_manager = ColorManager()
         self.semantic_memory = SemanticMemory()
+        self.archive = ConversationArchive(Path(archive_path))
         self.conversation_memories: Dict[str, ConversationMemory] = {}
         self.shared_memory = ConversationMemory(max_tokens=100000)
         self.running = True
@@ -195,6 +198,8 @@ class AIOrchestrator:
                     self.running = False
         console.print("\n[bold green]Conversation Complete.[/bold green]")
         self.plugins.run_hook("conversation_end", orchestrator=self)
+        self.archive.add_conversation(self.shared_memory.get_messages(), {"models": self.models})
+        self.archive.save()
 
     async def _initialize_conversation(self) -> None:
         has_human = "human" in self.models
@@ -225,6 +230,8 @@ def run_cli() -> None:
     parser.add_argument("--turns", type=int, default=5, help="Maximum number of conversation turns")
     parser.add_argument("--config", type=str, help="Path to configuration file")
     parser.add_argument("--log-folder", type=str, default="OrchestratorLogs", help="Folder for conversation logs")
+    parser.add_argument("--archive", type=str, default="conversation_archive.json", help="Path to conversation archive file")
+    parser.add_argument("--search", type=str, help="Search the conversation archive and exit")
     parser.add_argument("--list-models", action="store_true", help="List available models and exit")
 
     args = parser.parse_args()
@@ -234,6 +241,7 @@ def run_cli() -> None:
         max_turns=args.turns,
         log_folder=args.log_folder,
         config_path=args.config,
+        archive_path=args.archive,
     )
 
     if args.list_models:
@@ -241,6 +249,14 @@ def run_cli() -> None:
         for model_name in orchestrator.registry.list_available_models():
             model = orchestrator.registry.get_model(model_name)
             console.print(f"- {model_name} ({model.provider})")
+        return
+
+    if args.search:
+        results = orchestrator.archive.search(args.search)
+        console.print("[bold]Search Results:[/bold]")
+        for item in results:
+            snippet = item["text"].replace("\n", " ")[:200]
+            console.print(f"- {snippet}")
         return
 
     asyncio.run(orchestrator.run_conversation())

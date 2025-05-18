@@ -12,6 +12,7 @@ AI Orchestrator is a powerful framework for conducting multi-agent conversations
 - **Asynchronous Architecture**: Non-blocking operation with async/await pattern
 - **Comprehensive Logging**: Both human-readable and structured JSON logs of conversations
 - **Beautiful Console Interface**: Rich console output with color coding and formatting
+- **Searchable Archives**: Completed conversations are stored with embeddings for semantic retrieval
 
 ## Installation
 

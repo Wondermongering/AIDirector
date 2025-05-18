@@ -20,4 +20,7 @@ Reads the YAML configuration, providing access to model, orchestration and loggi
 ## ConversationLogger
 Writes conversation transcripts to plain text and JSON log files for later analysis.
 
+## ConversationArchive
+Persists entire conversation transcripts with embeddings so previous dialogues can be searched semantically.
+
 These classes are defined in `main.py` and are intended to be composed by `AIOrchestrator` when running a chat session.
