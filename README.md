@@ -132,6 +132,15 @@ The AI Orchestrator exposes several key classes:
 
 For full API documentation, see the [API reference](docs/api.md).
 
+## Running Tests
+
+The project uses [pytest](https://pytest.org/) for unit tests. To execute the
+test suite, simply run:
+
+```bash
+pytest
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
