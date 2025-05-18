@@ -1,4 +1,5 @@
 """Utilities for conversation messages and memory management."""
+import asyncio
 import datetime
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -6,6 +7,9 @@ from typing import Any, Dict, List, Union
 
 import tiktoken
 from pydantic import BaseModel, Field, validator
+
+from model_registry import ConfigurationManager, ModelRegistry, ModelRole
+from response_generator import ResponseGenerator
 
 
 class TokenLimitStrategy(Enum):
@@ -111,9 +115,58 @@ class ConversationMemory:
             self.total_tokens -= tokens
 
     def _summarize_conversation(self) -> None:
-        # Placeholder for summarization strategy.
-        self._truncate_oldest()
+        if len(self.messages) < 2:
+            return
+
+        half_index = len(self.messages) // 2
+        to_summarize = self.messages[:half_index]
+        summary_text = self._get_summary_from_model(to_summarize)
+        summary_message = Message(role="system", content=summary_text)
+
+        self.summaries.append(summary_text)
+        remaining = self.messages[half_index:]
+        self.messages = [summary_message] + remaining
+
+        # Recalculate tokens from scratch
+        self.total_tokens = 0
+        for msg in self.messages:
+            if isinstance(msg.content, MessageContent):
+                text = msg.content.text
+            else:
+                text = msg.content
+            self.total_tokens += len(self.encoder.encode(text))
 
     def _apply_sliding_window(self) -> None:
-        # Placeholder for sliding window strategy.
-        self._truncate_oldest()
+        target_tokens = int(self.max_tokens * 0.8)
+        while self.total_tokens > target_tokens:
+            if not self.messages:
+                break
+            oldest = self.messages.pop(0)
+            if isinstance(oldest.content, MessageContent):
+                tokens = len(self.encoder.encode(oldest.content.text))
+            else:
+                tokens = len(self.encoder.encode(oldest.content))
+            self.total_tokens -= tokens
+
+    def _get_summary_from_model(self, messages: List[Message]) -> str:
+        registry = ModelRegistry(ConfigurationManager())
+        generator = ResponseGenerator(registry)
+        summarizer_name = None
+        for name, config in registry.models.items():
+            if config.role == ModelRole.SUMMARIZER:
+                summarizer_name = name
+                break
+        if not summarizer_name:
+            summarizer_name = next(iter(registry.models.keys()))
+
+        temp_memory = ConversationMemory(max_tokens=self.max_tokens)
+        for msg in messages:
+            temp_memory.add_message(msg)
+
+        prompt = "Provide a concise summary of the following conversation."
+        try:
+            return asyncio.run(
+                generator.generate_response(summarizer_name, temp_memory, prompt)
+            )
+        except Exception as e:  # pragma: no cover - network failures
+            return f"[Summary error: {e}]"
