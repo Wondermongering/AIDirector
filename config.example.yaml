@@ -1,0 +1,84 @@
+# AI Orchestrator Configuration
+
+# Model configurations
+models:
+  gpt-4-turbo:
+    provider: OPENAI
+    api_name: gpt-4-turbo-preview
+    role: PRIMARY
+    temperature: 0.8
+    max_response_tokens: 2048
+    max_context_tokens: 128000
+    token_limit_strategy: SLIDING_WINDOW
+    system_prompt: |
+      You are a helpful, harmless, and honest AI assistant. Your goal is to provide
+      accurate and informative responses to help users with their questions.
+    custom_parameters:
+      top_p: 0.95
+      presence_penalty: 0.1
+      frequency_penalty: 0.1
+
+  claude-sonnet:
+    provider: ANTHROPIC
+    api_name: claude-3-sonnet-20240229
+    role: CRITIC
+    temperature: 0.7
+    max_response_tokens: 4096
+    max_context_tokens: 200000
+    token_limit_strategy: SUMMARIZE
+    system_prompt: |
+      You are a thoughtful critic and analyst. Your role is to carefully evaluate
+      arguments, identify potential issues, and suggest improvements. You are
+      not argumentative, but rather constructive in your feedback.
+
+  creative-gpt:
+    provider: OPENAI
+    api_name: gpt-4
+    role: CREATIVE
+    temperature: 1.0
+    max_response_tokens: 1024
+    max_context_tokens: 8192
+    token_limit_strategy: TRUNCATE_OLDEST
+    system_prompt: |
+      You are a creative assistant focused on generating original ideas and
+      solutions. Think outside the box and offer innovative perspectives.
+
+  logical-claude:
+    provider: ANTHROPIC
+    api_name: claude-3-opus-20240229
+    role: LOGICAL
+    temperature: 0.5
+    max_response_tokens: 2048
+    max_context_tokens: 100000
+    token_limit_strategy: TRUNCATE_OLDEST
+    system_prompt: |
+      You are a logical, analytical assistant. Your responses should be focused on
+      factual accuracy, sound reasoning, and logical consistency. Avoid speculation
+      and be clear about uncertainties.
+
+  human-participant:
+    provider: HUMAN
+    role: PRIMARY
+    system_prompt: "Human participant in the conversation."
+
+# Orchestration settings
+orchestration:
+  default_max_turns: 10
+  auto_summarize: true
+  summary_interval: 5
+  allow_human_intervention: true
+  intervention_probability: 0.2
+  default_models:
+    - gpt-4-turbo
+    - claude-sonnet
+    - human-participant
+
+# Logging settings
+logging:
+  log_level: INFO
+  console_output: true
+  file_output: true
+  rich_formatting: true
+  save_media: true
+  metrics_tracking: true
+  anonymize_data: false
